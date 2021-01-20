@@ -1,27 +1,47 @@
-var express = require('express');
-var app = express();
+// перед проектом ввести npm install
+const express = require("express");
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const app = express();
 
-app.get('/', function (req, res) {
-  res.send('Получил GET запрос');
+let storage = []; 
+
+app.use(cors());
+app.use(bodyParser.urlencoded({extended: true}));
+
+//получение данных для ALL
+app.get('/guide', function (req,res){
+    res.send(storage);
 });
 
-app.get('/:id', function (req, res) {
-  let id = req.params.id;
-  res.send('Получил GET запрос с параметром: ' + id);
+//получение данных для ID
+app.get('/guide/:id', function (req,res){
+    const id = req.params.id;
+    const item = storage[id];
+    if (item===null|| id>=storage.length) {
+        res.sendStatus(404);
+    } else res.send(storage[id]);
+
 });
 
-app.post('/', function (req, res) {
-  res.send('Получил POST запрос');
+//добавление пользователя
+app.post('/guide',(req,res)=>{
+    const newid = storage.push(req.body)-1;
+    res.send(newid.toString());
 });
 
-app.put('/', function (req, res) {
-  res.send('Получил PUT запрос');
+//апгрейд пользователя
+app.put('/guide/:id',(req,res) =>{
+    const id = req.params.id;
+    storage[id] = req.body;
+    res.send(id.toString());
 });
 
-app.delete('/', function (req, res) {
-  res.send('Получил DELETE запрос');
+//удаление пользователя
+app.delete('/guide/:id', (req,res) =>{
+    const id = req.params.id;
+    storage[id] = null;
+    res.send(id.toString()  );
 });
 
-app.listen(3000, function () {
-  console.log('Сервер запущен!');
-});
+app.listen(3000);
